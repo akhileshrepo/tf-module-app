@@ -11,6 +11,6 @@ variable "instance_type" {}
 variable "desired_capacity" {}
 variable "max_size" {}
 variable "min_size" {}
-variable "private_alb_name" {}
-variable "private_listener" {}
+variable "alb_name" {}
+variable "listener" {}
 variable "lb_priority" {}
