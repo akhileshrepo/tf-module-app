@@ -108,7 +108,7 @@ resource "aws_lb_target_group" "public" {
   port        = var.port
   target_type = "ip"
   protocol    = "HTTP"
-  vpc_id      = var.vpc_id
+  vpc_default_vpc_id = var.vpc_default_vpc_id
 }
 
 resource "aws_lb_target_group_attachment" "public" {
