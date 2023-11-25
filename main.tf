@@ -138,7 +138,7 @@ resource "aws_lb_listener_rule" "public" {
 
 }
 
-resource "aws_iam_policy" "policy" {
+resource "aws_iam_policy" "main" {
   name        = "${local.name_prefix}-policy"
   path        = "/"
   description = "${local.name_prefix}-policy"
@@ -156,7 +156,7 @@ resource "aws_iam_policy" "policy" {
           "ssm:GetParameters",
           "ssm:GetParameter"
         ],
-        "Resource" : "arn:aws:ssm:us-east-1:467609026719:parameter/dodb-dev.*"
+        "Resource" : "arn:aws:ssm:us-east-1:467609026719:parameter/dodb-${var.env}.*"
       },
       {
         "Sid" : "VisualEditor1",
@@ -166,5 +166,25 @@ resource "aws_iam_policy" "policy" {
       }
     ]
   })
+}
+
+resource "aws_iam_role" "test_role" {
+  name = "${local.name_prefix}-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Sid    = ""
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      },
+    ]
+  })
+  tags = merge(local.tags, {Name = "${local.name_prefix}-role"})
+
 }
 
