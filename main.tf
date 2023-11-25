@@ -137,3 +137,21 @@ resource "aws_lb_listener_rule" "public" {
   }
 
 }
+
+resource "aws_iam_role_policy" "policy" {
+  name = "${local.name_prefix}-policy"
+  path = "/"
+  description = "${local.name_prefix}-policy"
+
+  policy = jsonencode({
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Sid": "Statement1",
+        "Effect": "Allow",
+        "Action": [],
+        "Resource": []
+      }
+    ]
+  })
+}
