@@ -3,7 +3,7 @@ resource "aws_security_group" "main" {
   name        = "${local.name_prefix}-sg"
   description = "${local.name_prefix}-sg"
   vpc_id      = var.vpc_id
-  tags = merge(local.tags, {Name = "${local.name_prefix}-sg"})
+  tags        = merge(local.tags, { Name = "${local.name_prefix}-sg" })
 
   ingress {
     description = "APP"
@@ -21,7 +21,6 @@ resource "aws_security_group" "main" {
     cidr_blocks = var.ssh_ingress_cidr
   }
 
-
   egress {
     from_port        = 0
     to_port          = 0
@@ -30,6 +29,7 @@ resource "aws_security_group" "main" {
     ipv6_cidr_blocks = ["::/0"]
   }
 }
+
 resource "aws_iam_policy" "main" {
   name        = "${local.name_prefix}-policy"
   path        = "/"
@@ -101,16 +101,16 @@ resource "aws_launch_template" "main" {
   iam_instance_profile {
     name = "${local.name_prefix}-role"
   }
-  user_data              = base64encode(templatefile("${path.module}/userdata.sh",
+  user_data = base64encode(templatefile("${path.module}/userdata.sh",
     {
       component = var.component
       env       = var.env
-
     }))
   tag_specifications {
-      resource_type = "instance"
-      tags          = merge(local.tags, { Name = "${local.name_prefix}-ec2" })
+    resource_type = "instance"
+    tags          = merge(local.tags, { Name = "${local.name_prefix}-ec2" })
   }
+
 }
 
 resource "aws_autoscaling_group" "main" {
@@ -119,8 +119,7 @@ resource "aws_autoscaling_group" "main" {
   desired_capacity    = var.desired_capacity
   max_size            = var.max_size
   min_size            = var.min_size
-  target_group_arns = [aws_lb_target_group.main.arn]
-
+  target_group_arns   = [aws_lb_target_group.main.arn]
 
   launch_template {
     id      = aws_launch_template.main.id
@@ -134,12 +133,13 @@ resource "aws_autoscaling_group" "main" {
 
 }
 
+
 resource "aws_route53_record" "main" {
   zone_id = var.zone_id
-  name    = var.component == "frontend" ? var.env : "${var.component}-${var.env}"
+  name    = var.component == "frontend" ? var.env == "prod" ? "www" : var.env : "${var.component}-${var.env}"
   type    = "CNAME"
   ttl     = 30
-  records = [var.component == "frontend" ? var.public_alb_name : var.private_alb_name ]
+  records = [var.component == "frontend" ? var.public_alb_name : var.private_alb_name]
 }
 
 resource "aws_lb_target_group" "main" {
@@ -147,8 +147,8 @@ resource "aws_lb_target_group" "main" {
   port     = var.port
   protocol = "HTTP"
   vpc_id   = var.vpc_id
-}
 
+}
 
 
 resource "aws_lb_listener_rule" "main" {
@@ -162,10 +162,9 @@ resource "aws_lb_listener_rule" "main" {
 
   condition {
     host_header {
-      values = [var.component == "frontend" ? "${var.env}.akhildevops.online" : "${var.component}-${var.env}.akhildevops.online"]
+      values = [var.component == "frontend" ? "${var.env == "prod" ? "www" : var.env}.rdevopsb72.online" : "${var.component}-${var.env}.rdevopsb72.online"]
     }
   }
-
 }
 
 resource "aws_lb_target_group" "public" {
@@ -185,9 +184,10 @@ resource "aws_lb_target_group_attachment" "public" {
   availability_zone = "all"
 }
 
+
 resource "aws_lb_listener_rule" "public" {
-  count = var.component  == "frontend" ? 1 : 0
-  listener_arn = var.private_listener
+  count        = var.component == "frontend" ? 1 : 0
+  listener_arn = var.public_listener
   priority     = var.lb_priority
 
   action {
@@ -197,9 +197,8 @@ resource "aws_lb_listener_rule" "public" {
 
   condition {
     host_header {
-      values = ["${var.env}.akhildevops.online"]
+      values = ["${var.env == "prod" ? "www" : var.env}.rdevopsb72.online"]
     }
   }
-
 }
 
