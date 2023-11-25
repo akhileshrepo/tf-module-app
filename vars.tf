@@ -18,3 +18,4 @@ variable "public_alb_name" {}
 variable "public_listener" {}
 variable "default_vpc_id" {}
 variable "parameters" {}
+variable "kms_key_id" {}
