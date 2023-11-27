@@ -19,3 +19,4 @@ variable "public_listener" {}
 variable "default_vpc_id" {}
 variable "parameters" {}
 variable "kms_key_id" {}
+variable "monitoring_ingress_cidr" {}
