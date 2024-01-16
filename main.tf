@@ -20,14 +20,6 @@ resource "aws_security_group" "main" {
     cidr_blocks = var.ssh_ingress_cidr
   }
 
-  ingress {
-    description = "PROMETHEUS"
-    from_port   = 9100
-    to_port     = 9100
-    protocol    = "tcp"
-    cidr_blocks = var.monitoring_ingress_cidr
-  }
-
   egress {
     from_port        = 0
     to_port          = 0
@@ -100,6 +92,8 @@ resource "aws_launch_template" "main" {
   image_id               = data.aws_ami.ami.id
   instance_type          = var.instance_type
   vpc_security_group_ids = [aws_security_group.main.id]
+
+
   iam_instance_profile {
     name = "${local.name_prefix}-role"
   }
@@ -109,6 +103,7 @@ resource "aws_launch_template" "main" {
       component = var.component
       env       = var.env
     }))
+
   tag_specifications {
     resource_type = "instance"
     tags          = merge(local.tags, { Name = "${local.name_prefix}-ec2" })
@@ -131,11 +126,6 @@ resource "aws_autoscaling_group" "main" {
   tag {
     key                 = "Name"
     value               = local.name_prefix
-    propagate_at_launch = true
-  }
-  tag {
-    key                 = "Monitor"
-    value               = "yes"
     propagate_at_launch = true
   }
 }
