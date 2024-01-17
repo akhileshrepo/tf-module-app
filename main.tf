@@ -80,3 +80,19 @@ resource "aws_lb_target_group" "main" {
   protocol = "HTTP"
   vpc_id   = var.vpc_id
 }
+
+resource "aws_lb_listener_rule" "main" {
+  listener_arn = var.listener
+  priority     = 100
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.main.arn
+  }
+
+  condition {
+    host_header {
+      values = ["${var.component}-${var.env}.akhildevops.online"]
+    }
+  }
+}
