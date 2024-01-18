@@ -93,7 +93,17 @@ resource "aws_lb_listener_rule" "main" {
 
   condition {
     host_header {
-      values = ["${var.component}-${var.env}.akhildevops.online"]
+      values = [ var.component == "frontend" ? "${var.env}.akhildevops.online" : "${var.component}-{var.env}.akhildevops.online" ]
     }
   }
+}
+
+
+resource "aws_lb_target_group" "ip-example" {
+  count = var.component == "frontend" ? 1 : 0
+  name        = "${local.name_prefix}-public"
+  port        = var.port
+  protocol    = "HTTP"
+  target_type = "ip"
+  vpc_id      = var.vpc_id
 }
