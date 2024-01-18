@@ -99,11 +99,17 @@ resource "aws_lb_listener_rule" "main" {
 }
 
 
-resource "aws_lb_target_group" "ip-example" {
+resource "aws_lb_target_group" "public" {
   count = var.component == "frontend" ? 1 : 0
   name        = "${local.name_prefix}-public"
   port        = var.port
   protocol    = "HTTP"
-  target_type = "ip"
   vpc_id      = var.vpc_id
+}
+
+resource "aws_lb_target_group_attachment" "public" {
+  count = data.dns_a_record_set.private_alb.addrs
+  target_group_arn = aws_lb_target_group.public[0].arn
+  target_id        = element(data.dns_a_record_set.private_alb.addrs, count.index)
+  port             = 80
 }
