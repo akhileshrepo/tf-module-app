@@ -57,7 +57,6 @@ resource "aws_iam_policy" "main" {
       }
     ]
   })
-
 }
 
 resource "aws_iam_role" "main" {
@@ -80,7 +79,6 @@ resource "aws_iam_role" "main" {
   tags = merge(local.tags, { Name = "${local.name_prefix}-role" })
 }
 
-
 resource "aws_iam_role_policy_attachment" "attach" {
   role       = aws_iam_role.main.name
   policy_arn = aws_iam_policy.main.arn
@@ -90,7 +88,6 @@ resource "aws_iam_instance_profile" "main" {
   name = "${local.name_prefix}-role"
   role = aws_iam_role.main.name
 }
-
 
 resource "aws_launch_template" "main" {
   name                   = local.name_prefix
@@ -166,11 +163,11 @@ resource "aws_lb_listener_rule" "main" {
 
 
 resource "aws_lb_target_group" "public" {
-  count = var.component == "frontend" ? 1 : 0
+  count       = var.component == "frontend" ? 1 : 0
   name        = "${local.name_prefix}-public"
   port        = var.port
-  protocol    = "HTTP"
   target_type = "ip"
+  protocol    = "HTTP"
   vpc_id      = var.default_vpc_id
 }
 
