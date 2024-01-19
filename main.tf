@@ -36,27 +36,28 @@ resource "aws_iam_policy" "main" {
   description = "${local.name_prefix}-policy"
 
   policy = jsonencode({
-    "Version": "2012-10-17",
-    "Statement": [
+    "Version" : "2012-10-17",
+    "Statement" : [
       {
-        "Sid": "VisualEditor0",
-        "Effect": "Allow",
-        "Action": [
+        "Sid" : "VisualEditor0",
+        "Effect" : "Allow",
+        "Action" : [
           "ssm:GetParameterHistory",
           "ssm:GetParametersByPath",
           "ssm:GetParameters",
           "ssm:GetParameter"
         ],
-        "Resource": local.policy_resources
+        "Resource" : local.policy_resources
       },
       {
-        "Sid": "VisualEditor1",
-        "Effect": "Allow",
-        "Action": "ssm:DescribeParameters",
-        "Resource": "*"
+        "Sid" : "VisualEditor1",
+        "Effect" : "Allow",
+        "Action" : "ssm:DescribeParameters",
+        "Resource" : "*"
       }
     ]
   })
+
 }
 
 resource "aws_iam_role" "main" {
@@ -76,8 +77,9 @@ resource "aws_iam_role" "main" {
     ]
   })
 
-  tags  = merge(local.tags, { Name = "${local.name_prefix}-role" })
+  tags = merge(local.tags, { Name = "${local.name_prefix}-role" })
 }
+
 
 resource "aws_iam_role_policy_attachment" "attach" {
   role       = aws_iam_role.main.name
@@ -91,13 +93,12 @@ resource "aws_iam_instance_profile" "main" {
 
 
 resource "aws_launch_template" "main" {
-  name   = local.name_prefix
-  image_id      = data.aws_ami.ami.id
-  instance_type = var.instance_type
+  name                   = local.name_prefix
+  image_id               = data.aws_ami.ami.id
+  instance_type          = var.instance_type
   vpc_security_group_ids = [aws_security_group.main.id]
   iam_instance_profile {
     name = "${local.name_prefix}-role"
-
   }
 
   user_data = base64encode(templatefile("${path.module}/userdata.sh",
@@ -108,12 +109,11 @@ resource "aws_launch_template" "main" {
 
   tag_specifications {
     resource_type = "instance"
-    tags = merge(local.tags, { Name = "${local.name_prefix}-ec2" })
+    tags          = merge(local.tags, { Name = "${local.name_prefix}-ec2" })
   }
 }
 
-resource "aws_autoscaling_group" "bar" {
-
+resource "aws_autoscaling_group" "main" {
   name                = "${local.name_prefix}-asg"
   vpc_zone_identifier = var.subnet_ids
   desired_capacity    = var.desired_capacity
@@ -135,10 +135,10 @@ resource "aws_autoscaling_group" "bar" {
 
 resource "aws_route53_record" "main" {
   zone_id = var.zone_id
-  name    = var.component == "frontend" ? var.env : "${var.component}-${var.env}"
+  name    = var.component == "frontend" ? var.env == "prod" ? "www" : var.env : "${var.component}-${var.env}"
   type    = "CNAME"
   ttl     = 30
-  records = [var.component == "frontend" ? var.public_alb_name : var.private_alb_name ]
+  records = [var.component == "frontend" ? var.public_alb_name : var.private_alb_name]
 }
 
 resource "aws_lb_target_group" "main" {
@@ -159,7 +159,7 @@ resource "aws_lb_listener_rule" "main" {
 
   condition {
     host_header {
-      values = [var.component == "frontend" ? "${var.env == "prod" ? "www" : var.env}.rdevopsb72.online" : "${var.component}-${var.env}.rdevopsb72.online"]
+      values = [var.component == "frontend" ? "${var.env == "prod" ? "www" : var.env}.akhildevops.online" : "${var.component}-${var.env}.akhildevops.online"]
     }
   }
 }
@@ -175,15 +175,16 @@ resource "aws_lb_target_group" "public" {
 }
 
 resource "aws_lb_target_group_attachment" "public" {
-  count = var.component == "frontend" ? length(var.subnet_ids) : 0
-  target_group_arn = aws_lb_target_group.public[0].arn
-  target_id        = element(tolist(data.dns_a_record_set.private_alb.addrs), count.index)
-  port             = 80
+  count             = var.component == "frontend" ? length(var.subnet_ids) : 0
+  target_group_arn  = aws_lb_target_group.public[0].arn
+  target_id         = element(tolist(data.dns_a_record_set.private_alb.addrs), count.index)
+  port              = 80
   availability_zone = "all"
 }
 
+
 resource "aws_lb_listener_rule" "public" {
-  count = var.component == "frontend" ? 1 : 0
+  count        = var.component == "frontend" ? 1 : 0
   listener_arn = var.public_listener
   priority     = var.lb_priority
 
@@ -194,7 +195,7 @@ resource "aws_lb_listener_rule" "public" {
 
   condition {
     host_header {
-      values = ["${var.env}.akhildevops.online" ]
+      values = ["${var.env == "prod" ? "www" : var.env}.akhildevops.online"]
     }
   }
 }
