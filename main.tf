@@ -64,3 +64,11 @@ resource "aws_autoscaling_group" "main" {
     propagate_at_launch = true
   }
 }
+
+resource "aws_route53_record" "main" {
+  zone_id = var.zone_id
+  name    = "${var.component}-${var.env}"
+  type    = "CNAME"
+  ttl     = 30
+  records = [var.alb_name]
+}
