@@ -7,3 +7,7 @@ variable "subnet_ids" {}
 variable "sg_ingress_cidr" {}
 variable "ssh_ingress_cidr" {}
 variable "instance_type" {}
+variable "zone_id" {}
+variable "desired_capacity" {}
+variable "max_size" {}
+variable "min_size" {}
