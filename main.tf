@@ -68,10 +68,10 @@ resource "aws_autoscaling_group" "main" {
 
 resource "aws_route53_record" "main" {
   zone_id = var.zone_id
-  name    = "${var.component}-${var.env}"
+  name    = var.component == "frontend" ? var.env : "${var.component}-${var.env}"
   type    = "CNAME"
   ttl     = 30
-  records = [var.alb_name]
+  records = [var.component == "frontend" ? var.public_alb_name : var.private_alb_name]
 }
 
 resource "aws_lb_target_group" "main" {
@@ -82,7 +82,7 @@ resource "aws_lb_target_group" "main" {
 }
 
 resource "aws_lb_listener_rule" "main" {
-  listener_arn = var.listener
+  listener_arn = var.private_listener
   priority     = var.lb_priority
 
   action {
