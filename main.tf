@@ -29,12 +29,12 @@ resource "aws_security_group" "main" {
   }
 }
 
-
 resource "aws_launch_template" "main" {
-  name   = local.name_prefix
-  image_id      = data.aws_ami.ami.id
-  instance_type = var.instance_type
+  name                   = local.name_prefix
+  image_id               = data.aws_ami.ami.id
+  instance_type          = var.instance_type
   vpc_security_group_ids = [aws_security_group.main.id]
+
   user_data = base64encode(templatefile("${path.module}/userdata.sh",
     {
       component = var.component
@@ -49,12 +49,12 @@ resource "aws_launch_template" "main" {
 }
 
 resource "aws_autoscaling_group" "main" {
-  name = "${local.name_prefix}-asg"
+  name                = "${local.name_prefix}-asg"
   vpc_zone_identifier = var.subnet_ids
-  desired_capacity   = var.desired_capacity
-  max_size           = var.max_size
-  min_size           = var.min_size
-  target_group_arns = [aws_lb_target_group.main.arn]
+  desired_capacity    = var.desired_capacity
+  max_size            = var.max_size
+  min_size            = var.min_size
+  target_group_arns   = [aws_lb_target_group.main.arn]
 
   launch_template {
     id      = aws_launch_template.main.id
@@ -69,7 +69,7 @@ resource "aws_autoscaling_group" "main" {
 
 resource "aws_route53_record" "main" {
   zone_id = var.zone_id
-  name    = var.component == "frontend" ? var.env : "${var.component}-${var.env}"
+  name    = var.component == "frontend" ? var.env == "prod" ? "www" : var.env : "${var.component}-${var.env}"
   type    = "CNAME"
   ttl     = 30
   records = [var.component == "frontend" ? var.public_alb_name : var.private_alb_name]
@@ -93,7 +93,7 @@ resource "aws_lb_listener_rule" "main" {
 
   condition {
     host_header {
-      values = [var.component == "frontend" ? "${var.env}.akhildevops.online" : "${var.component}-${var.env}.akhildevops.online"]
+      values = [var.component == "frontend" ? "${var.env == "prod" ? "www" : var.env}.akhildevops.online" : "${var.component}-${var.env}.akhildevops.online"]
     }
   }
 }
