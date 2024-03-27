@@ -36,29 +36,29 @@ resource "aws_iam_policy" "main" {
   description = "${local.name_prefix}-policy"
 
   policy = jsonencode({
-    "Version" : "2012-10-17",
-    "Statement" : [
+    "Version": "2012-10-17",
+    "Statement": [
       {
-        "Sid" : "VisualEditor0",
-        "Effect" : "Allow",
-        "Action" : [
-          "kms:Decrypt",
+        "Sid": "VisualEditor0",
+        "Effect": "Allow",
+        "Action": [
           "ssm:GetParameterHistory",
           "ssm:GetParametersByPath",
           "ssm:GetParameters",
           "ssm:GetParameter"
         ],
-
+        "Resource": "arn:aws:ssm:us-east-1:467609026719:parameter/docdb.${var.env}.*"
       },
       {
-        "Sid" : "VisualEditor1",
-        "Effect" : "Allow",
-        "Action" : "ssm:DescribeParameters",
-        "Resource" : "*"
+        "Sid": "VisualEditor1",
+        "Effect": "Allow",
+        "Action": "ssm:DescribeParameters",
+        "Resource": "*"
       }
     ]
   })
 }
+
 
 resource "aws_iam_role" "main" {
   name = "${local.name_prefix}-role"
@@ -79,6 +79,7 @@ resource "aws_iam_role" "main" {
 
   tags = merge(local.tags, { Name = "${local.name_prefix}-role" })
 }
+
 
 resource "aws_iam_role_policy_attachment" "attach" {
   role       = aws_iam_role.main.name
