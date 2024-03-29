@@ -19,3 +19,4 @@ variable "default_vpc_id" {}
 variable "public_listener" {}
 variable "az" {}
 variable "parameters" {}
+variable "monitoring_ingress_cidr" {}
