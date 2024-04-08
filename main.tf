@@ -38,13 +38,13 @@ resource "aws_security_group" "main" {
 }
 
 resource "aws_security_group_rule" "nginx_exporter" {
-  count = var.component ==  "frontend" ? 1 : 0
+  count             = var.component == "frontend" ? 1 : 0
   type              = "ingress"
   from_port         = 9113
   to_port           = 9113
   protocol          = "tcp"
   cidr_blocks       = var.monitoring_ingress_cidr
-  ipv6_cidr_blocks  = aws_security_group.main.id
+  security_group_id = aws_security_group.main.id
   description       = "Nginx Prometheus Exporter"
 }
 
