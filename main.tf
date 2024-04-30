@@ -60,6 +60,7 @@ resource "aws_iam_policy" "main" {
         "Sid": "VisualEditor0",
         "Effect": "Allow",
         "Action": [
+          "kms:Decrypt",
           "ssm:GetParameterHistory",
           "ssm:GetParametersByPath",
           "ssm:GetParameters",
@@ -126,7 +127,7 @@ resource "aws_launch_template" "main" {
 
 
   block_device_mappings {
-    device_name = ""
+    device_name = "/dev/sda1"
 
     ebs {
       encrypted = true
