@@ -54,30 +54,29 @@ resource "aws_iam_policy" "main" {
   description = "${local.name_prefix}-policy"
 
   policy = jsonencode({
-    "Version": "2012-10-17",
-    "Statement": [
+    "Version" : "2012-10-17",
+    "Statement" : [
       {
-        "Sid": "VisualEditor0",
-        "Effect": "Allow",
-        "Action": [
+        "Sid" : "VisualEditor0",
+        "Effect" : "Allow",
+        "Action" : [
           "kms:Decrypt",
           "ssm:GetParameterHistory",
           "ssm:GetParametersByPath",
           "ssm:GetParameters",
           "ssm:GetParameter"
         ],
-        "Resource": local.policy_resources
+        "Resource" : local.policy_resources
       },
       {
-        "Sid": "VisualEditor1",
-        "Effect": "Allow",
-        "Action": "ssm:DescribeParameters",
-        "Resource": "*"
+        "Sid" : "VisualEditor1",
+        "Effect" : "Allow",
+        "Action" : "ssm:DescribeParameters",
+        "Resource" : "*"
       }
     ]
   })
 }
-
 
 resource "aws_iam_role" "main" {
   name = "${local.name_prefix}-role"
@@ -98,7 +97,6 @@ resource "aws_iam_role" "main" {
 
   tags = merge(local.tags, { Name = "${local.name_prefix}-role" })
 }
-
 
 resource "aws_iam_role_policy_attachment" "attach" {
   role       = aws_iam_role.main.name
@@ -125,15 +123,17 @@ resource "aws_launch_template" "main" {
       env       = var.env
     }))
 
+    block_device_mappings {
+      device_name = "/dev/sda1"
 
-  block_device_mappings {
-    device_name = "/dev/sda1"
-
-    ebs {
-      encrypted = true
-      kms_key_id = var.kms_key_id
+      ebs {
+        delete_on_termination = "true"
+        encrypted             = "true"
+        kms_key_id            = var.kms_key_id
+        volume_size           = 10
+        volume_type           = "gp2"
+      }
     }
-  }
 
   tag_specifications {
     resource_type = "instance"
@@ -141,21 +141,6 @@ resource "aws_launch_template" "main" {
   }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 resource "aws_autoscaling_group" "main" {
   name                = "${local.name_prefix}-asg"
@@ -181,6 +166,8 @@ resource "aws_autoscaling_group" "main" {
   }
 }
 
+
+
 resource "aws_route53_record" "main" {
   zone_id = var.zone_id
   name    = var.component == "frontend" ? var.env == "prod" ? "www" : var.env : "${var.component}-${var.env}"
@@ -195,14 +182,14 @@ resource "aws_lb_target_group" "main" {
   protocol = "HTTP"
   vpc_id   = var.vpc_id
   health_check {
-    enabled               = true
-    healthy_threshold     = 2
-    interval              = 5
-    path                  = "/health"
-    port                  = var.port
-    timeout               = 2
-    unhealthy_threshold   = 2
-    matcher               = "200"
+    enabled             = true
+    healthy_threshold   = 2
+    interval            = 5
+    path                = "/health"
+    port                = var.port
+    timeout             = 2
+    unhealthy_threshold = 2
+    matcher             = "200"
   }
 }
 
@@ -231,15 +218,16 @@ resource "aws_lb_target_group" "public" {
   vpc_id      = var.default_vpc_id
 
   health_check {
-    enabled               = true
-    healthy_threshold     = 2
-    interval              = 5
-    path                  = "/"
-    port                  = var.port
-    timeout               = 2
-    unhealthy_threshold   = 2
-    matcher               = "404"
+    enabled             = true
+    healthy_threshold   = 2
+    interval            = 5
+    path                = "/"
+    port                = var.port
+    timeout             = 2
+    unhealthy_threshold = 2
+    matcher             = "404"
   }
+
 }
 
 resource "aws_lb_target_group_attachment" "public" {
@@ -249,6 +237,7 @@ resource "aws_lb_target_group_attachment" "public" {
   port              = 80
   availability_zone = "all"
 }
+
 
 resource "aws_lb_listener_rule" "public" {
   count        = var.component == "frontend" ? 1 : 0
