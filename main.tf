@@ -103,3 +103,11 @@ resource "aws_lb_target_group" "public" {
   protocol = "HTTP"
   vpc_id = var.vpc_id
 }
+
+resource "aws_lb_target_group_attachment" "test" {
+  count = length(data.dns_a_record_set.private_alb.addrs)
+  target_group_arn = aws_lb_target_group.public[0].arn
+  target_id        = element(data.dns_a_record_set.private_alb.addrs, count.index)
+  port             = 80
+}
+
