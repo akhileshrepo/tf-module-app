@@ -5,6 +5,14 @@ resource "aws_security_group" "main" {
   tags = merge(var.tags, { Name = "${local.name_prefix}-sg" })
 
   ingress {
+    description         = "SSH"
+    from_port           = 22
+    to_port             = 22
+    protocol            = "tcp"
+    cidr_blocks         = var.ssh_ingress_cidr
+  }
+
+  ingress {
     description         = "APP"
     from_port           = var.port
     to_port             = var.port
