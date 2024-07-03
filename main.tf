@@ -100,12 +100,13 @@ resource "aws_lb_target_group" "public" {
   count = var.component == "frontend" ? 1 : 0
   name = "${local.name_prefix}-public"
   port = var.port
+  target_type = "ip"
   protocol = "HTTP"
   vpc_id = var.vpc_id
 }
 
 resource "aws_lb_target_group_attachment" "test" {
-  count = length(tolist(data.dns_a_record_set.private_alb.addrs))
+  count = var.component == "frontend" ? length(tolist(data.dns_a_record_set.private_alb.addrs)) : 0
   target_group_arn = aws_lb_target_group.public[0].arn
   target_id        = element(tolist(data.dns_a_record_set.private_alb.addrs), count.index)
   port             = 80
