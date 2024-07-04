@@ -1,4 +1,4 @@
 #!/bin/bash
-yum install python3.11-pip.noarch -y &>>/opt/userdata.log
-pip3.11 install botocore boto3 &>>/opt/userdata.log
+dnf install python3.11-pip ansible -y | tee -a /opt/userdata.log
+pip3.11 install boto3 botocore | tee -a /opt/userdata.log
 ansible-pull -i localhost, -U https://github.com/akhileshrepo/roboshop-ansible.git main.yml -e component=${component} -e env=${env} &>>/opt/userdata.log
