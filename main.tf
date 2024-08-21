@@ -191,7 +191,7 @@ resource "aws_lb_listener_rule" "main" {
 
   condition {
     host_header {
-      values = [var.component == "frontend" ? "${var.env}.akhildevops.online" : "${var.component}-${var.env}.akhildevops.online"]
+      values = [var.component == "frontend" ? "${var.env}.vinithaws.online" : "${var.component}-${var.env}.vinithaws.online"]
     }
   }
 }
@@ -236,7 +236,7 @@ resource "aws_lb_listener_rule" "public" {
 
   condition {
     host_header {
-      values = ["${var.env}.akhildevops.online"]
+      values = ["${var.env}.vinithaws.online"]
     }
   }
 }
