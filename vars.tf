@@ -20,3 +20,4 @@ variable "default_vpc_id" {}
 variable "az" {}
 variable "parameters" {}
 variable "monitoring_ingress_cidr" {}
+variable "kms_key_id" {}
