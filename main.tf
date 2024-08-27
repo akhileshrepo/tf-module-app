@@ -170,7 +170,7 @@ resource "aws_autoscaling_group" "main" {
 
 resource "aws_route53_record" "main" {
   zone_id = var.zone_id
-  name    = var.component == "frontend" ? var.env : "${var.component}-${var.env}"
+  name    = var.component == "frontend" ? var.env == "prod" ? "www" : var.env : "${var.component}-${var.env}"
   type    = "CNAME"
   ttl     = 30
   records = [var.component == "frontend" ? var.public_alb_name : var.private_alb_name]
@@ -204,7 +204,7 @@ resource "aws_lb_listener_rule" "main" {
 
   condition {
     host_header {
-      values = [var.component == "frontend" ? "${var.env}.vinithaws.online" : "${var.component}-${var.env}.vinithaws.online"]
+      values = [var.component == "frontend" ? "${var.env == "prod" ? "www" : var.env}.vinithaws.online" : "${var.component}-${var.env}.vinithaws.online"]
     }
   }
 }
@@ -249,7 +249,7 @@ resource "aws_lb_listener_rule" "public" {
 
   condition {
     host_header {
-      values = ["${var.env}.vinithaws.online"]
+      values = ["${var.env == "prod" ? "www" : var.env}.vinithaws.online"]
     }
   }
 }
